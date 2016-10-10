@@ -12,46 +12,60 @@ public class RiceBug {
         DIRECTION = dir;
         ID = ident;
         strength = 0;
-        isAlive = false;
+        isAlive = true;
         currentX = initX;
         currentY = initY;
         startTime = startAt;
     }
 
     public void move(Plant[][] field) {
-        field[currentX][currentY].removeBug(this);
+        try {
+            field[currentX][currentY].removeBug(this);
 
-        switch(DIRECTION) {
-            case 'B':
-                currentY++;
-                break;
-            case 'G':
-                currentY--;
-                break;
-            case 'D':
-                currentX--;
-                break;
-            case 'E':
-                currentX++;
-                break;
-            case 'A':
-                currentX--;
-                currentY++;
-                break;
-            case 'C':
-                currentX++;
-                currentY++;
-                break;
-            case 'F':
-                currentX--;
-                currentY--;
-                break;
-            case 'H':
-                currentX++;
-                currentY--;
+
+            switch (DIRECTION) {
+                case 'B':
+                    currentX--;
+                    break;
+                case 'G':
+                    currentX++;
+                    break;
+                case 'D':
+                    currentY--;
+                    break;
+                case 'E':
+                    currentY++;
+                    break;
+                case 'A':
+                    currentY--;
+                    currentX--;
+                    break;
+                case 'C':
+                    currentY++;
+                    currentX--;
+                    break;
+                case 'F':
+                    currentY--;
+                    currentX++;
+                    break;
+                case 'H':
+                    currentY++;
+                    currentX++;
+                    break;
+                default:
+                    currentY = -1;
+                    currentX = -1;
+            }
+        } catch(ArrayIndexOutOfBoundsException e) {
+            currentX = -1;
+            currentY = -1;
         }
+    }
 
-        field[currentX][currentY].addBug(this);
+    public void kill() {
+        isAlive = false;
+        currentX = 0;
+        currentY = 0;
     }
 
     public int getID() {
@@ -64,13 +78,19 @@ public class RiceBug {
 
     public boolean alive() { return isAlive; }
 
-    public void animate() { isAlive = true; }
-
     public void increaseStrength() {
         strength++;
     }
 
     public int getStartTime() { return startTime; }
+
+    public int getCurrentX() {
+        return currentX;
+    }
+
+    public int getCurrentY() {
+        return currentY;
+    }
 
     public String toString() {
         return "BUG ID: " + ID + "\nSTRENGTH: " + strength + "\nCURRENT POSITION: [" + currentX + "]" + "[" + currentY + "]" +

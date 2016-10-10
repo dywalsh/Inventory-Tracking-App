@@ -13,53 +13,62 @@ public class Plant {
         bugsOnPlant = new ArrayList<RiceBug>();
     }
 
-    public Plant(int initialBugs) {
-        numBugsOnPlant = initialBugs;
-        strongestOnPlant = null;
-        isInfected = numBugsOnPlant > 0? true : false;
-    }
-
     public boolean infect() {
-        if(!isInfected) {
+        if (!isInfected) {
             isInfected = true;
             return true;
         } else return false;
     }
 
-    public RiceBug getStrongestOnPlant() {
-        return strongestOnPlant;
-    }
-
     public void addBug(RiceBug bug) {
         bugsOnPlant.add(bug);
-        if(!bug.alive()) bug.animate();
+        numBugsOnPlant++;
 
-        if(bug.getStrength() > strongestOnPlant.getStrength()) {
+        if(bug.getStrength() > getStrongest()) {
             strongestOnPlant = bug;
         }
     }
 
     public void removeBug(RiceBug bug) {
-        int bugIndex = 0;
-
-        while(bugsOnPlant.get(bugIndex).getID() != bug.getID()) {
-            bugIndex++;
-        }
-
-        bugsOnPlant.remove(bugIndex);
-
-        if (strongestOnPlant == bug) {
-            strongestOnPlant = bugsOnPlant.get(0);
-            for(int i = 1; i < bugsOnPlant.size(); i++) {
-                if(bugsOnPlant.get(i).getStrength() > strongestOnPlant.getStrength()) {
-                    strongestOnPlant = bugsOnPlant.get(i);
+        if (this.hasBugsOn()) {
+            int bugIndex = 0;
+            if (bugsOnPlant.size() > 1) {
+                while (bugIndex < bugsOnPlant.size() && bugsOnPlant.get(bugIndex).getID() != bug.getID()) {
+                    bugIndex++;
                 }
+            } else {
+                bugIndex = 0;
             }
+
+            bugsOnPlant.remove(bugIndex);
+
+            if (strongestOnPlant == bug && bugsOnPlant.size() > 0) {
+                strongestOnPlant = bugsOnPlant.get(0);
+                for (int i = 1; i < bugsOnPlant.size(); i++) {
+                    if (bugsOnPlant.get(i).getStrength() > strongestOnPlant.getStrength()) {
+                        strongestOnPlant = bugsOnPlant.get(i);
+                    }
+                }
+            } else {
+                strongestOnPlant = null;
+            }
+            numBugsOnPlant = bugsOnPlant.size();
         }
-        numBugsOnPlant = bugsOnPlant.size();
     }
 
     public boolean hasBugsOn() {
         return numBugsOnPlant > 0;
+    }
+
+    public ArrayList<RiceBug> getBugsOnPlant() {
+        return bugsOnPlant;
+    }
+
+    public int getStrongest() {
+        if (strongestOnPlant != null) {
+            return strongestOnPlant.getStrength();
+        } else {
+            return 0;
+        }
     }
 }
