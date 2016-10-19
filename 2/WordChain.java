@@ -22,7 +22,10 @@ public class WordChain {
         in.close();
         ArrayList<String> currentChain = new ArrayList<String>();
         currentChain.add(inputWords[0]);
+
+        //Attempted paths stored as their indices in the original input array to allow for duplicates
         HashMap<String, ArrayList<Integer>> attempts = new HashMap<>();
+
         for(int i = 0; i < inputWords.length; i++) {
             attempts.put(inputWords[i], new ArrayList<Integer>());
         }
