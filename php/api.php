@@ -4,27 +4,37 @@
  *  Group Project - Inventory Management App
  *  Team-ID: AA16
  *
- *  (somewhat)RESTful API for querying the database
- *	Better routing not yet implemented
+ *  A (somewhat) RESTful API for querying the database
+ *  Better routing not implemented
  */
 
+//TODO: Login System
+
+//Turn off error reporting for security
+error_reporting(0);
+
+//Includes
 $site_root = $_SERVER['DOCUMENT_ROOT'];
 require_once __DIR__ . '/vendor/autoload.php';
 require_once($site_root . "/queries.php");
-//Retreive database details from .en
+
+//Retreive database details from .env
 $env = new Dotenv\Dotenv(__DIR__);
 $env->load();
 
 //Establish connection to database
-
 $server_name = getenv('SERVER_NAME');
 $db_name = getenv('DB_NAME');
 $db_user = getenv('DB_USER');
 $db_pass = getenv('DB_PASS');
 $conn = new mysqli($server_name, $db_user, $db_pass, $db_name);
+
+//----------------------------Remove before release------------------------------------
 if ($conn->connect_error) {
     die("Connection to Database Failed: " . $conn->connect_error);
 }
+
+//-------------------------------------------------------------------------------------
 
 
 define("NULL_DATA", "");
@@ -33,6 +43,7 @@ header("Content-Type:application/json");
 $req_method = $_SERVER['REQUEST_METHOD'];
 
 if ($req_method == 'GET') {
+
 
     //Respond to GET requests
     if(!empty($_GET['op'])) {
@@ -44,9 +55,9 @@ if ($req_method == 'GET') {
             //Return a list of objects that have a user specified end-date
             $target_end_date = mysqli_real_escape_string($conn, $_GET['endDate']);
             $user_id = mysqli_real_escape_string($conn, $_GET['userId']);
-            $data = get_projects_by_end_date($conn, $target_end_date, $user_id);
+            $data = get_objects_by_end_date($conn, $target_end_date, $user_id);
             if($data == NULL) {
-                deliver_response(200, "no results", NULL_DATA);
+                deliver_response(404, "no results", NULL_DATA);
             } else {
                 deliver_response(200, "listObjectsByDate success", $data);
             }
@@ -121,10 +132,13 @@ if ($req_method == 'GET') {
             //Add a project to the database
             $proj_end_date = mysqli_real_escape_string($conn, $_POST['endDate']);  
             $created_by = mysqli_real_escape_string($conn, $_POST['userId']);
-            $initial_individuals = mysqli_real_escape_string($conn, $_POST['individualIds']);
-            $proj_name = mysqli_real_escape_string($conn, $_POST['projectName']); 
-            if (add_project($conn, $proj_name, $proj_end_date, $initial_individuals, $created_by)) {
+            $initial_individual = mysqli_real_escape_string($conn, $_POST['individualId']);
+            $proj_name = mysqli_real_escape_string($conn, $_POST['projectName']);
+            $result = add_project($conn, $proj_name, $proj_end_date, $initial_individual, $created_by);
+            if ($result == "success") {
                 deliver_response(200, "addProject success", NULL_DATA);
+            } else if($result == "duplicate") {
+                deliver_response(200, "addProject failed", "already exists");
             } else {
                 deliver_response(404, "addProject failed", NULL_DATA);
             }
@@ -139,8 +153,8 @@ if ($req_method == 'GET') {
             }
         } else if($operation == 'attachIndToProj') {
             //Attach an individual to a project
-            $individual_id = mysqli_real_escape_string($conn, $_POST['ind_id']);
-            $project_id = mysqli_real_escape_string($conn, $_POST['proj_id']);
+            $individual_id = mysqli_real_escape_string($conn, $_POST['indId']);
+            $project_id = mysqli_real_escape_string($conn, $_POST['projId']);
             if(attach_ind_to_proj($conn, $individual_id, $project_id)) {
                 deliver_response(200, "attachIndToProj success", NULL_DATA);
             } else {
@@ -150,13 +164,13 @@ if ($req_method == 'GET') {
             //Add an object to the database
             $barcode = mysqli_real_escape_string($conn, $_POST['barcode']);
             $created_by = mysqli_real_escape_string($conn, $_POST['userId']);
-            if(!empty($_POST['proj_id'])) {
-                $project_id = mysqli_real_escape_string($conn, $_POST['proj_id']);
+            if(!empty($_POST['projId'])) {
+                $project_id = mysqli_real_escape_string($conn, $_POST['projId']);
             } else {
                 $project_id = NULL;
             }
-            if(!empty($_POST['ind_id'])) {
-                $individual_id = mysqli_real_escape_string($conn, $_POST['ind_id']);
+            if(!empty($_POST['indId'])) {
+                $individual_id = mysqli_real_escape_string($conn, $_POST['indId']);
             } else {
                 $individual_id = NULL;
             }
@@ -173,22 +187,38 @@ if ($req_method == 'GET') {
             }
         } else if($operation == 'attachObjToInd') {
             //Attach an object to an individual
-            $barcode = mysqli_real_escape_string($conn, $_POST['barcode']);
+            $obj_id = mysqli_real_escape_string($conn, $_POST['objId']);
             $individual_id = mysqli_real_escape_string($conn, $_POST['individualId']);
-            if(attach_obj_to_ind($conn, $barcode, $individual_id)) {
+            $user_id = mysqli_real_escape_string($conn, $_POST['userId']);
+            if(attach_obj_to_ind($conn, $obj_id, $individual_id, $user_id)) {
                 deliver_response(200, "attachObjToInd successful", NULL_DATA);
             } else {
                 deliver_response(404, "attachObjToInd failed", NULL_DATA);
             }
         } else if($operation == 'attachObjToProj') {
             //Attach an object to a project
-            $barcode = mysqli_real_escape_string($conn, $_POST['barcode']);
+            $obj_id = mysqli_real_escape_string($conn, $_POST['objId']);
             $individual_id = mysqli_real_escape_string($conn, $_POST['individualId']);
-            $project_id = mysqli_real_escape_string($conn, $_POST['projectId']);
-            if(attach_obj_to_proj($conn, $barcode, $individual_id, $project_id)) {
-                deliver_response(200, "attachObjToProj success", NULL_DATA);
+            $project_id = mysqli_real_escape_string($conn, $_POST['projId']);
+            $user_id = mysqli_real_escape_string($conn, $_POST['userId']);
+            if(attach_obj_to_proj($conn, $obj_id, $individual_id, $project_id, $user_id)) {
+                deliver_response(200, "attachObjToInd successful", NULL_DATA);
             } else {
-                deliver_response(404, "attachObjToPRoj failed", NULL_DATA);
+                deliver_response(404, "attachObjToInd failed", NULL_DATA);
+            }
+        } else if($operation == 'addUser') {
+            //Add a new user of the app
+            $name = mysqli_real_escape_string($conn, $_POST['userName']);
+            $email = mysqli_real_escape_string($conn, $_POST['userEmail']);
+            $hashedPass = mysqli_real_escape_string($conn, $_POST['pass']);
+            $hashedPass = hash('sha512', $hashedPass);
+            $result = add_user($conn, $name, $email, $hashedPass);
+            if($result == 'success') {
+                deliver_response(200, "new user added", NULL_DATA);
+            } else if($result == 'duplicate') {
+                deliver_response(200, "addUser failed", "email exists");
+            } else {
+                deliver_response(404, "addUser failed", NULL_DATA);
             }
         } else {
             deliver_response(404, "Not a valid operation", NULL_DATA);
