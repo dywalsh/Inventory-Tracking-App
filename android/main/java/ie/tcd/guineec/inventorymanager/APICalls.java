@@ -4,10 +4,6 @@
 
 package ie.tcd.guineec.inventorymanager;
 
-/*
-* A class to deal with making calls to the API
-*/
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class APICalls {
-    public static final String BASE_URL = "http://localhost:8888/api.php?";
+    public static final String BASE_URL = "http://project-tests.eu.pn/api/api.php?";
     private static Gson g = new Gson();
 
     private static String buildUrl(HashMap<String, String> params) {
