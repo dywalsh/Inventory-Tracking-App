@@ -13,7 +13,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+
+public class LoginActivity extends AppCompatActivity {
     private static User currentUser;
     private EditText email;
     private EditText pass;
@@ -22,34 +23,37 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Button login = (Button) findViewById(R.id.loginButton);
-        email = (EditText) findViewById(R.id.loginEmail);
+        setContentView(R.layout.activity_login);
+
+
+        email = (EditText) findViewById(R.id.etUsername);
+        pass = (EditText) findViewById(R.id.etPassword);
+        final Button bLogin = (Button) findViewById(R.id.bLogin);
         final TextView registerLink = (TextView) findViewById(R.id.tvRegisterHere);
-        pass = (EditText) findViewById(R.id.loginPass);
         logStat = (TextView) findViewById(R.id.loginStatus);
-        login.setOnClickListener(new View.OnClickListener() {
+
+
+        registerLink.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
+                    LoginActivity.this.startActivity(registerIntent);
+                }
+
+        });
+
+        bLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 login();
             }
         });
-
-        registerLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent registerIntent = new Intent(MainActivity.this, RegisterActivity.class);
-                MainActivity.this.startActivity(registerIntent);
-            }
-
-        });
     }
-
     public void login() {
         final String mail = email.getText().toString();
         final String password = pass.getText().toString();
         AsyncTask<Void, Void, Void> loginAttempt = new AsyncTask<Void, Void, Void>() {
-            ProgressDialog pd = new ProgressDialog(MainActivity.this);;
+            ProgressDialog pd = new ProgressDialog(LoginActivity.this);;
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
@@ -91,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchWindow() {
-        Intent switchToMyProjects = new Intent(MainActivity.this, Myprojects.class);
+        Intent switchToMyProjects = new Intent(LoginActivity.this, Myprojects.class);
         startActivity(switchToMyProjects);
     }
 
@@ -99,3 +103,5 @@ public class MainActivity extends AppCompatActivity {
         return currentUser;
     }
 }
+
+

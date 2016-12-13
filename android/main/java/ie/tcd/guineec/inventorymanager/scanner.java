@@ -25,21 +25,29 @@ public class scanner extends AppCompatActivity implements OnClickListener {
     NavigationView navigationView;
 
     //scanner vars
-    private Button scanBtn;
-    private TextView formatTxt,contentTxt;
+    private Button scanSearchBtn,scanAddBtn,scanAssignBtn;
     String scanner_content, scanner_format;
 
+    /*
+        integer to save which button was pressed:
+        0 = scanner_scanAndAddBtn
+        1 = scanner_scanAndAssginBtn
+        2 = scanner_scanAndSearchBtn
+    */
+    private int buttonPressed;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.scanner_screen);
 
-        //scanner result vars
-        scanBtn = (Button) findViewById(R.id.scan_button);
-        formatTxt = (TextView)findViewById(R.id.scan_format);
-        contentTxt =(TextView)findViewById(R.id.scan_content);
-        //scanner listener for when the scan button is clicked
-        scanBtn.setOnClickListener(this);
+        scanSearchBtn = (Button) findViewById(R.id.scanner_scanAndSearchBtn);
+        scanAddBtn = (Button) findViewById(R.id.scanner_scanAndAddBtn);
+        scanAssignBtn = (Button) findViewById(R.id.scanner_scanAndAssginBtn);
+
+        //scanner listener for when the scan buttons are clicked
+        scanSearchBtn.setOnClickListener(this);
+        scanAddBtn.setOnClickListener(this);
+        scanAssignBtn.setOnClickListener(this);
 
         //side bar code
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
@@ -71,6 +79,11 @@ public class scanner extends AppCompatActivity implements OnClickListener {
                         startActivity(intent3);
                         item.setChecked(true);
                         break;
+                    case R.id.nav_logout:
+                        Intent intent4 = new Intent(scanner.this, MainActivity.class);
+                        startActivity(intent4);
+                        item.setChecked(true);
+                        break;
                 }
                 return false;
             }
@@ -81,7 +94,18 @@ public class scanner extends AppCompatActivity implements OnClickListener {
     }
     //respond to clicks
     public void onClick(View v){
-        if(v.getId()==R.id.scan_button){
+        if(v.getId()==R.id.scanner_scanAndAddBtn){
+            buttonPressed=0;
+            IntentIntegrator scanIntegrator = new IntentIntegrator(this);
+            scanIntegrator.initiateScan();
+        }
+        else if(v.getId()==R.id.scanner_scanAndAssginBtn){
+            buttonPressed=1;
+            IntentIntegrator scanIntegrator = new IntentIntegrator(this);
+            scanIntegrator.initiateScan();
+        }
+        else if(v.getId()==R.id.scanner_scanAndSearchBtn){
+            buttonPressed=2;
             IntentIntegrator scanIntegrator = new IntentIntegrator(this);
             scanIntegrator.initiateScan();
         }
@@ -92,13 +116,20 @@ public class scanner extends AppCompatActivity implements OnClickListener {
         if(scanningResult != null) {
             String scanContent = scanningResult.getContents();
             String scanFormat = scanningResult.getFormatName();
-            formatTxt.setText("FORMAT: " + scanFormat);
-            contentTxt.setText("CONTENT: " + scanContent);
             scanner_content=scanContent;
             scanner_format=scanFormat;
-            useContent.getContent(scanContent);
-            Intent useContent = new Intent(scanner.this, useContent.class);
-            startActivity(useContent);
+            useScannerResult.getContent(scanContent, buttonPressed);
+
+            if(buttonPressed==2)
+            {
+                ObjectOptions.setBarcode(scanContent);
+                Intent switchToViewObjects=new Intent(scanner.this, ObjectOptions.class);
+                startActivity(switchToViewObjects);
+            }
+            else {
+                Intent useContent = new Intent(scanner.this, useScannerResult.class);
+                startActivity(useContent);
+            }
         }
         else{
             Toast toast = Toast.makeText(getApplicationContext(),

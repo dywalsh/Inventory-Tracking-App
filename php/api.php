@@ -10,24 +10,16 @@
 
 //TODO: Login System
 
+header("Content-Type:application/json");
 //Turn off error reporting for security
-error_reporting(0);
+//error_reporting(0);
 
 //Includes
-$site_root = $_SERVER['DOCUMENT_ROOT'];
 require_once __DIR__ . '/vendor/autoload.php';
-require_once($site_root . "/queries.php");
-
-//Retreive database details from .env
-$env = new Dotenv\Dotenv(__DIR__);
-$env->load();
+require_once(__DIR__ . "/queries.php");
 
 //Establish connection to database
-$server_name = getenv('SERVER_NAME');
-$db_name = getenv('DB_NAME');
-$db_user = getenv('DB_USER');
-$db_pass = getenv('DB_PASS');
-$conn = new mysqli($server_name, $db_user, $db_pass, $db_name);
+$conn = new mysqli("fdb2.freehostingeu.com", "1961003_sweng", "dbpass1001", "1961003_sweng");
 
 //----------------------------Remove before release------------------------------------
 if ($conn->connect_error) {
@@ -38,7 +30,6 @@ if ($conn->connect_error) {
 
 
 define("NULL_DATA", "");
-header("Content-Type:application/json");
 
 $req_method = $_SERVER['REQUEST_METHOD'];
 
@@ -81,6 +72,24 @@ if ($req_method == 'GET') {
             } else {
                 deliver_response(200, "getObjsAttachedToProj success", $data);
             }
+        } else if($operation == 'getProjUsing') {
+            $obj_id = mysqli_real_escape_string($conn, $_GET['objId']);
+            $user_id = mysqli_real_escape_string($conn, $_GET['userId']);
+            $data = get_project_using($conn, $obj_id, $user_id);
+            if($data == NULL) {
+                deliver_response(404, "No results", NULL_DATA);
+            } else {
+                deliver_response(200, "project found", $data);
+            }
+        } else if($operation == 'getIndResponsibleFor') {
+            $obj_id = mysqli_real_escape_string($conn, $_GET['objId']);
+            $user_id = mysqli_real_escape_string($conn, $_GET['userId']);
+            $data = get_ind_responsible_for($conn, $obj_id, $user_id);
+            if($data == NULL) {
+                deliver_response(404, "No results", NULL_DATA);
+            } else {
+                deliver_response(200, "individual found", $data);
+            }
         } else if($operation == "findObjects") {
             //Find any objects matching the given barcode
             $barcode = mysqli_real_escape_string($conn, $_GET['barcode']);
@@ -92,14 +101,14 @@ if ($req_method == 'GET') {
                 deliver_response(200, "findObjects success", $data);
             }
         } else if($operation == 'listObjects') {
-        	//Return a list of all objects for a given user
-        	$user_id = mysqli_real_escape_string($conn, $_GET["userId"]);
-        	$data = list_objects($conn, $user_id);
-        	if($data == NULL) {
-        		deliver_response(404, "no results found", NULL_DATA);
-        	} else {
-        		deliver_response(200, "listObjects success", $data);
-        	}
+            //Return a list of all objects for a given user
+            $user_id = mysqli_real_escape_string($conn, $_GET["userId"]);
+            $data = list_objects($conn, $user_id);
+            if($data == NULL) {
+                deliver_response(404, "no results found", NULL_DATA);
+            } else {
+                deliver_response(200, "listObjects success", $data);
+            }
         } else if($operation == "listIndividuals") {
             //Return a list of all individuals added by the given user
             $user_id = mysqli_real_escape_string($conn, $_GET["userId"]);
@@ -118,6 +127,25 @@ if ($req_method == 'GET') {
             } else {
                 deliver_response(200, "listProjects success", $data);
             }
+        } else if($operation == "listDamaged") {
+            //Return a list of damaged objects
+            $user_id = mysqli_real_escape_string($conn, $_GET['userId']);
+            $data = list_damaged($conn, $user_id);
+            if($data == NULL) {
+                deliver_response(404, "no results found", NULL_DATA);
+            } else {
+                deliver_response(200, "listDamaged success", $data);
+            }
+        } else if($operation == 'getIndsAttachedToProj') {
+            //Return a list of individuals attached to the given project
+            $user_id = mysqli_real_escape_string($conn, $_GET['userId']);
+            $project_id = mysqli_real_escape_string($conn, $_GET['projId']);
+            $data = get_inds_attached_to_proj($conn, $project_id, $user_id);
+            if($data == NULL) {
+                deliver_response(404, "no results found", NULL_DATA);
+            } else {
+                deliver_response(200, "success", $data);
+            }
         } else {
             deliver_response(400, "no get op specified", NULL_DATA);
         }
@@ -130,7 +158,7 @@ if ($req_method == 'GET') {
         $operation = mysqli_real_escape_string($conn, $_POST['op']);
         if ($operation == 'addProject') {
             //Add a project to the database
-            $proj_end_date = mysqli_real_escape_string($conn, $_POST['endDate']);  
+            $proj_end_date = mysqli_real_escape_string($conn, $_POST['endDate']);
             $created_by = mysqli_real_escape_string($conn, $_POST['userId']);
             $initial_individual = mysqli_real_escape_string($conn, $_POST['individualId']);
             $proj_name = mysqli_real_escape_string($conn, $_POST['projectName']);
@@ -167,17 +195,17 @@ if ($req_method == 'GET') {
             if(!empty($_POST['projId'])) {
                 $project_id = mysqli_real_escape_string($conn, $_POST['projId']);
             } else {
-                $project_id = NULL;
+                $project_id = "";
             }
             if(!empty($_POST['indId'])) {
                 $individual_id = mysqli_real_escape_string($conn, $_POST['indId']);
             } else {
-                $individual_id = NULL;
+                $individual_id = "";
             }
             if(!empty($_POST['description'])) {
                 $description = mysqli_real_escape_string($conn,$_POST['description']);
             } else {
-                $description = NULL;
+                $description = "";
             }
 
             if(add_object($conn, $barcode, $individual_id, $project_id, $description, $created_by)) {
@@ -216,9 +244,39 @@ if ($req_method == 'GET') {
             if($result == 'success') {
                 deliver_response(200, "new user added", NULL_DATA);
             } else if($result == 'duplicate') {
-                deliver_response(200, "addUser failed", "email exists");
+                deliver_response(404, "addUser failed", "email exists");
             } else {
                 deliver_response(404, "addUser failed", NULL_DATA);
+            }
+        } else if($operation == 'login') {
+            //Login as a User of the app.
+            $email = mysqli_real_escape_string($conn, $_POST['userEmail']);
+            $password = hash("sha512", mysqli_real_escape_string($conn, $_POST['pass']));
+            $result = login($conn, $email, $password);
+            if($result == NULL) {
+                deliver_response(404, "login failed", NULL_DATA);
+            } else {
+                deliver_response(200, "login success", $result);
+            }
+        } else if($operation == 'markDamaged') {
+            //Mark an object as damaged
+            $obj_id = mysqli_real_escape_string($conn, $_POST['objId']);
+            $user_id = mysqli_real_escape_string($conn, $_POST['userId']);
+            $result = mark_damaged($conn, $obj_id, $user_id);
+            if($result) {
+                deliver_response(200, "marked as damaged", NULL_DATA);
+            } else {
+                deliver_response(404, "Couldn't mark damaged", NULL_DATA);
+            }
+        } else if($operation == "markFixed") {
+            //Mark an object as fixed
+            $obj_id = mysqli_real_escape_string($conn, $_POST['objId']);
+            $user_id = mysqli_real_escape_string($conn, $_POST['userId']);
+            $result = mark_fixed($conn, $obj_id, $user_id);
+            if($result) {
+                deliver_response(200, "marked as fixed", NULL_DATA);
+            } else {
+                deliver_response(404, "couldn't mark fixed", NULL_DATA);
             }
         } else {
             deliver_response(404, "Not a valid operation", NULL_DATA);
@@ -237,11 +295,11 @@ if ($req_method == 'GET') {
 
 function deliver_response($status_code, $status_message, $data)
 {
-    header($status_code, $status_message);
+    //header($status_code, $status_message);
     $response['status_code'] = $status_code;
     $response['status_message'] = $status_message;
     $response['data'] = $data;
 
-    $json_response = json_encode($response);
-    echo $json_response;
+    $json = json_encode($response);
+    echo $json;
 }

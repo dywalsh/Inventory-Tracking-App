@@ -6,15 +6,17 @@ public class Equipment {
     private Project projectUsing;
     private Individual indResponsible;
     private String description;
+    private boolean damaged;
     private User createdBy;
 
-    public Equipment(int id, String barcode, Project projectUsing, Individual indResponsible, String description, User createdBy) {
+    public Equipment(int id, String barcode, Project projectUsing, Individual indResponsible, String description, boolean damaged, User createdBy) {
         this.id = id;
         this.barcode = barcode;
         this.projectUsing = projectUsing;
         this.indResponsible = indResponsible;
         this.description = description;
         this.createdBy = createdBy;
+        this.damaged = damaged;
     }
 
     public int getId() {
@@ -35,6 +37,10 @@ public class Equipment {
 
     public String getDescription() {
         return description;
+    }
+
+    public boolean getDamaged() {
+        return damaged;
     }
 
     public User getCreatedBy() {

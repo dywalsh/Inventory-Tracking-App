@@ -17,13 +17,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".options">
-            <intent-filter>
-                <action android:name="android.intent.action.SECOND" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
         <activity android:name=".scanner">
             <intent-filter>
                 <action android:name="android.intent.action.THIRD" />
@@ -38,14 +31,68 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".useContent">
+        <activity android:name=".useScannerResult">
             <intent-filter>
                 <action android:name="android.intent.action.FIFTH" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Myprojects"></activity>
+        <activity android:name=".useScannerResultAddIndividual">
+            <intent-filter>
+                <action android:name="android.intent.action.FIFTH" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".useScannerResultAddProject">
+            <intent-filter>
+                <action android:name="android.intent.action.FIFTH" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    <activity android:name=".ProjectOptions">
+        <intent-filter>
+            <action android:name="android.intent.action.SIXTH" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+    <activity android:name=".Myprojects" />
+    <activity android:name=".ObjsByDate"/>
+        <activity android:name=".Search" />
+        <activity android:name=".SearchResult" />
+
+
+        <activity android:name=".AddProject">
+        <intent-filter>
+            <action android:name="android.intent.action.SEVENTH" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+    <activity android:name=".ObjectOptions">
+        <intent-filter>
+            <action android:name="android.intent.action.SEVENTH" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+    </activity>
+        <activity android:name=".RegisterActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SIXTH" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ObjectOptionsSelected">
+            <intent-filter>
+                <action android:name="android.intent.action.Eighth" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

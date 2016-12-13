@@ -1,6 +1,7 @@
 package ie.tcd.guineec.inventorymanager;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
@@ -10,12 +11,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
+import android.util.Log;
+import android.os.AsyncTask;
 public class add_indiv extends AppCompatActivity {
 
     //side bar vars
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mToggle;
+
     //variable for the sidebar to change screens
     NavigationView navigationView;
 
@@ -23,6 +26,7 @@ public class add_indiv extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.add_indiv_screen);
+        final Button bOK = (Button) findViewById(R.id.ok_button);
 
         //side bar code
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
@@ -31,14 +35,14 @@ public class add_indiv extends AppCompatActivity {
         mToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
         //code to allow side bar to change screens onclick
         navigationView= (NavigationView)findViewById(R.id.navigation_view);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public boolean onNavigationItemSelected(MenuItem item){
+            public boolean onNavigationItemSelected(MenuItem item) {
                 //code to change screens on clicks
-                switch(item.getItemId()) {
-
+                switch (item.getItemId()) {
                     case R.id.nav_projects:
                         Intent intent = new Intent(add_indiv.this, Myprojects.class);
                         startActivity(intent);
@@ -54,11 +58,48 @@ public class add_indiv extends AppCompatActivity {
                         startActivity(intent3);
                         item.setChecked(true);
                         break;
+                    case R.id.nav_search:
+                        Intent intent4 = new Intent(add_indiv.this, Search.class);
+                        startActivity(intent4);
+                        item.setChecked(true);
+                        break;
+                    case R.id.nav_logout:
+                        Intent intent5 = new Intent(add_indiv.this, MainActivity.class);
+                        startActivity(intent5);
+                        item.setChecked(true);
+                        break;
                 }
                 return false;
             }
         });
         //end of sider bar code except onOpitionsItemSelected function
+        bOK.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final User CurrentUser = MainActivity.getUser();
+                EditText firstName, lastName;
+                firstName = (EditText) findViewById(R.id.first_name);
+                lastName = (EditText) findViewById(R.id.last_name);
+
+                String firstName1 = firstName.getText().toString();
+                String lastName1 = lastName.getText().toString();
+                final String indivName = firstName1 + " " + lastName1;
+                AsyncTask<Void,Void,Void> addIndiv = new AsyncTask(){
+                    @Override
+                    protected void onPreExecute() {
+                        Intent intent = new Intent(add_indiv.this,add_indiv.class);
+                        startActivity(intent);
+                    }
+
+                    @Override
+                    protected Object doInBackground(Object[] params) {
+                        APICalls.addIndividual(indivName, CurrentUser);
+                        return null;
+                    }
+                };
+                addIndiv.execute();
+            }
+        });
     }
 
     //side bar function
@@ -73,13 +114,7 @@ public class add_indiv extends AppCompatActivity {
     }
 
     //results of user input for add indiv
-    private EditText firstName, lastName;
     //onclick function to save add indiv inputs
-    public void buttonOnClick(View v){
-        Button ok_button =(Button) v;
-        firstName = (EditText)findViewById(R.id.first_name);
-        lastName = (EditText)findViewById(R.id.last_name);
-    }
 
 
 }

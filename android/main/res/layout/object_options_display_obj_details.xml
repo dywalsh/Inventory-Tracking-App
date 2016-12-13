@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="ie.tcd.guineec.inventorymanager.ObjectOptionsSelected"
+    android:id="@+id/drawerLayout">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="74dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/project_idShow"
+                android:text="project id"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="85dp">
+
+            <TextView
+                android:text="project name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/project_name"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="75dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/individual_res_id"
+                android:text="individual responsible id"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="85dp">
+
+            <TextView
+                android:text="individual responsible name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/individual__res_name"
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <TextView
+            android:text="is damaged"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:id="@+id/is_damaged"
+            android:layout_weight="0.56"
+            android:textAlignment="center" />
+
+        <Button
+            android:text="Mark as Damaged"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/damagedBtn" />
+        <Button
+            android:text="Mark as not Damaged"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/notDamagedBtn" />
+
+    </LinearLayout>
+</LinearLayout>
+    <android.support.design.widget.NavigationView
+        android:id="@+id/navigation_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        app:menu="@menu/navigation_menu"
+        android:layout_gravity="start">
+    </android.support.design.widget.NavigationView>
+
+</android.support.v4.widget.DrawerLayout>

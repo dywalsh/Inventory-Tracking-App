@@ -9,6 +9,8 @@
 //Insertion queries
 function add_project(mysqli $dbconn, $name, $end_date, $ind_id, $user_id)
 {
+    $end_date = new DateTime($end_date);
+    $end_date = $end_date->format('Y-m-d');
     $query = "SELECT * FROM `projects` WHERE name = '$name' AND created_by = '$user_id'";
     $result = $dbconn->query($query);
     if ($result->num_rows > 0 && $result != FALSE) {
@@ -97,6 +99,28 @@ function add_user(mysqli $dbconn, $name, $email, $hashedPass)
     }
 }
 
+function mark_damaged(mysqli $dbconn, $obj_id, $user_id)
+{
+    $query = "UPDATE `objects` SET damaged = 1 WHERE id = '$obj_id' AND created_by = '$user_id'";
+    if($dbconn->query($query)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+
+}
+
+function mark_fixed(mysqli $dbconn, $obj_id, $user_id)
+{
+    $query = "UPDATE `objects` SET damaged = 0 WHERE id = '$obj_id' AND created_by = '$user_id'";
+    if($dbconn->query($query)) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+
 //Retreival queries
 
 function get_objects_by_end_date(mysqli $dbconn, $end_date, $user_id)
@@ -117,7 +141,7 @@ function get_objects_by_end_date(mysqli $dbconn, $end_date, $user_id)
         $ret_arr = array();
         $i = 0;
         foreach ($ids as $id) {
-            $query = "SELECT * from `objects` WHERE project_id = '$id' AND created_by = '$user_id'";
+            $query = "SELECT * from `objects` WHERE project_id = '$id' AND created_by = '$user_id' AND damaged = 0";
             $result = $dbconn->query($query);
             if ($result->num_rows > 0 && $result != FALSE) {
                 while ($row = $result->fetch_assoc()) {
@@ -164,6 +188,86 @@ function get_objects_attached_to_project(mysqli $dbconn, $proj_id, $user_id)
             $i++;
         }
 
+        return $ret_arr;
+    } else {
+        return NULL;
+    }
+}
+
+function get_project_using(mysqli $dbconn, $obj_id, $user_id)
+{
+    $query = "SELECT * FROM `objects` WHERE id = '$obj_id' AND created_by = $user_id";
+    $result = $dbconn->query($query);
+    if($result->num_rows <= 0 || $result == NULL) {
+        return NULL;
+    } else {
+        $row = $result->fetch_assoc();
+        $proj_id = $row['project_id'];
+
+        $query = "SELECT * FROM `projects` WHERE id = '$proj_id' AND created_by = '$user_id'";
+        $result = $dbconn->query($query);
+        $ret_array = array();
+        $i = 0;
+        if($result->num_rows > 0 && $result != NULL) {
+            while($row = $result->fetch_assoc()) {
+                $ret_array[$i] = $row;
+                $i++;
+            }
+            return $ret_array;
+        } else {
+            return NULL;
+        }
+    }
+}
+
+function get_ind_responsible_for(mysqli $dbconn, $obj_id, $user_id)
+{
+    $query = "SELECT * FROM `objects` WHERE id = '$obj_id' AND created_by = $user_id";
+    $result = $dbconn->query($query);
+    if($result->num_rows <= 0 || $result == NULL) {
+        return NULL;
+    } else {
+        $row = $result->fetch_assoc();
+        $ind_id = $row['individual_id'];
+
+        $query = "SELECT * FROM `individuals` WHERE id = '$ind_id' AND created_by = '$user_id'";
+        $result = $dbconn->query($query);
+        $ret_array = array();
+        $i = 0;
+        if($result->num_rows > 0 && $result != NULL) {
+            while($row = $result->fetch_assoc()) {
+                $ret_array[$i] = $row;
+                $i++;
+            }
+            return $ret_array;
+        } else {
+            return NULL;
+        }
+    }
+}
+
+function get_inds_attached_to_proj(mysqli $dbconn, $proj_id, $user_id)
+{
+    $query = "SELECT * FROM `individuals_projects` WHERE project_id = '$proj_id'";
+    $result = $dbconn->query($query);
+    $ids = array();
+    $i = 0;
+    if($result->num_rows > 0 && $result != null) {
+        while($row = $result->fetch_assoc()) {
+            $ids[$i] = $row['individual_id'];
+            $i++;
+        }
+
+        $i = 0;
+        $ret_arr = array();
+        foreach($ids as $id) {
+            $query = "SELECT * FROM `individuals` WHERE id = '$id' AND created_by = '$user_id'";
+            $result = $dbconn->query($query);
+            while($row = $result->fetch_assoc()) {
+                $ret_arr[$i] = $row;
+                $i++;
+            }
+        }
         return $ret_arr;
     } else {
         return NULL;
@@ -238,6 +342,41 @@ function list_projects(mysqli $dbconn, $user_id)
         }
 
         return $ret_arr;
+    } else {
+        return NULL;
+    }
+}
+
+function list_damaged(mysqli $dbconn, $user_id)
+{
+    $query = "SELECT * FROM `objects` WHERE created_by = '$user_id' AND damaged = 1";
+    $result = $dbconn->query($query);
+    $ret_arr = array();
+    if ($result->num_rows > 0 && $result != FALSE) {
+        $i = 0;
+        while ($row = $result->fetch_assoc()) {
+            $ret_arr[$i] = $row;
+            $i++;
+        }
+
+        return $ret_arr;
+    } else {
+        return NULL;
+    }
+}
+
+//Login system
+function login(mysqli $dbconn, $email, $pass)
+{
+    $query = "SELECT * FROM `users` WHERE email = '$email' AND password = '$pass'";
+    $result = $dbconn->query($query);
+    if ($result->num_rows > 0 && $result != FALSE) {
+        $row = mysqli_fetch_row($result);
+        $ret = array();
+        $ret['id'] = $row[0];
+        $ret['name'] = $row[1];
+        $ret['email'] = $row[2];
+        return $ret;
     } else {
         return NULL;
     }

@@ -1,0 +1,7 @@
+DEPLOYMENT INSTRUCTIONS
+
+1. Copy InventoryManager.apk to phone
+2. Navigate to apk using phone's file manager.
+3. Click the apk and you should be met with an android installer
+4. To utilise barcode scanner, download ZXXing from play store, or follow the prompts from within the app.
+5. Enjoy 

@@ -20,32 +20,73 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="ie.tcd.guineec.inventorymanager.scanner">
 
-    <TextView
-        android:text="scan_format"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="39dp"
-        android:id="@+id/scan_format" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weightSum="1">
 
-    <TextView
-        android:text="scan_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:id="@+id/scan_content"
-        android:layout_alignParentTop="true" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="110dp"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true">
 
-    <Button
-        android:text="Scan Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/scan_button"
-        android:onClick="dispatchTakePictureIntent"
-        style="@style/Widget.AppCompat.Button.Colored"
-        android:background="@android:color/holo_red_dark"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="17dp" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp">
+
+            <Button
+                android:text="Scan And Assign to individual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/scanner_scanAndAssginBtn"
+                android:onClick="dispatchTakePictureIntent"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:background="@android:color/holo_red_dark"
+                android:layout_centerVertical="true" />
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.57">
+
+            <Button
+                android:text="Scan and Add To Project"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/scanner_scanAndAddBtn"
+                android:onClick="dispatchTakePictureIntent"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:background="@android:color/holo_red_dark"
+                android:layout_centerVertical="true" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="74dp">
+
+            <Button
+                android:text="Scan and Search"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/scanner_scanAndSearchBtn"
+                android:onClick="dispatchTakePictureIntent"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:background="@android:color/holo_red_dark"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="17dp" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
 </RelativeLayout>
 
 <android.support.design.widget.NavigationView

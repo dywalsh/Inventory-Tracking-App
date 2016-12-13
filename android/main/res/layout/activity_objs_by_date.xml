@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_objs_by_date"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/zero_padding"
+    android:paddingLeft="@dimen/zero_padding"
+    android:paddingRight="@dimen/zero_padding"
+    android:paddingTop="@dimen/zero_padding"
+    tools:context="ie.tcd.guineec.inventorymanager.ObjsByDate">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="date"
+        android:ems="10"
+        android:id="@+id/dateObjsByDate"
+        android:layout_centerHorizontal="true"
+        android:background="@android:color/white"
+        android:hint="@string/select_date"
+        android:padding="10dp" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/dateObjsByDate"
+        android:layout_centerHorizontal="true"
+        android:padding="16dp"
+        android:id="@+id/objsDateList"
+        android:background="?attr/colorControlHighlight" />
+</RelativeLayout>

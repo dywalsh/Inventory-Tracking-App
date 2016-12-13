@@ -1,22 +1,24 @@
 /*
 * A class to deal with making calls to the API
 */
+        package ie.tcd.guineec.inventorymanager;
 
-package ie.tcd.guineec.inventorymanager;
+        import android.util.Log;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.Gson;
+        import com.google.gson.GsonBuilder;
+        import com.google.gson.JsonArray;
+        import com.google.gson.JsonElement;
+        import com.google.gson.JsonObject;
+        import com.google.gson.JsonParser;
+        import com.google.gson.Gson;
 
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.Map;
+        import java.io.*;
+        import java.net.HttpURLConnection;
+        import java.net.URL;
+        import java.net.URLEncoder;
+        import java.nio.charset.Charset;
+        import java.util.HashMap;
+        import java.util.Map;
 
 public class APICalls {
     public static final String BASE_URL = "http://project-tests.eu.pn/api/api.php?";
@@ -98,6 +100,9 @@ public class APICalls {
             String respCode = obj.get(("status_code")).getAsString();
             if (respCode.equals("200")) {
                 JsonArray e = obj.getAsJsonArray("data");
+                for(JsonElement j : e) {
+                    Log.d("API", j.toString());
+                }
                 return e;
             } else {
                 return null;
@@ -124,9 +129,7 @@ public class APICalls {
         JsonObject obj = (jp.parse(getResponse(params))).getAsJsonObject();
         JsonElement stat = obj.get("status_message");
         String status = stat.getAsString();
-        if (status.equals("API connection working")) {
-            return true;
-        } else return false;
+        return status.equals("API connection working");
     }
 
     public static Equipment[] getObjectsByDate(String endDate, User currentUser) {
@@ -188,6 +191,45 @@ public class APICalls {
         }
     }
 
+    public static Project getProjUsing(Equipment object, User currentUser) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("op", "getProjUsing");
+        params.put("objId", "" + object.getId());
+        params.put("userId", "" + currentUser.getId());
+        String response = getResponse(params);
+        if (response == null) {
+            return null;
+        } else {
+            JsonArray e = getResponseAsJsonArray(response);
+            if (e != null) {
+                Gson dateGson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                Project ret = dateGson.fromJson(e.get(0), Project.class);
+                return ret;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public static Individual getIndResponsibleFor(Equipment object, User currentUser) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("op", "getIndResponsibleFor");
+        params.put("objId", "" + object.getId());
+        params.put("userId", "" + currentUser.getId());
+        String response = getResponse(params);
+        if (response == null) {
+            return null;
+        } else {
+            JsonArray e = getResponseAsJsonArray(response);
+            if (e != null) {
+                Individual ret = g.fromJson(e.get(0), Individual.class);
+                return ret;
+            } else {
+                return null;
+            }
+        }
+    }
+
     public static Equipment[] findObjects(String barcode, User currentUser) {
         HashMap<String, String> params = new HashMap<>();
         params.put("op", "findObjects");
@@ -225,10 +267,47 @@ public class APICalls {
         }
     }
 
+    public static Equipment[] getAllDamaged(User currentUser) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("op", "listDamaged");
+        params.put("userId", "" + currentUser.getId());
+        String response = getResponse(params);
+        if(response == null) {
+            return null;
+        } else {
+            JsonArray e = getResponseAsJsonArray(response);
+            if(e != null) {
+                Equipment[] ret = g.fromJson(e, Equipment[].class);
+                return ret;
+            } else {
+                return null;
+            }
+        }
+    }
+
     public static Individual[] getAllIndividuals(User currentUser) {
         HashMap<String, String> params = new HashMap<>();
         params.put("op", "listIndividuals");
         params.put("userId", "" + currentUser.getId());
+        String response = getResponse(params);
+        if (response == null) {
+            return null;
+        } else {
+            JsonArray e = getResponseAsJsonArray(response);
+            if (e != null) {
+                Individual[] ret = g.fromJson(e, Individual[].class);
+                return ret;
+            } else {
+                return null;
+            }
+        }
+    }
+
+    public static Individual[] getIndsAttachedToProj(Project proj, User currentUser) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("op", "getIndsAttachedToProj");
+        params.put("userId", "" + currentUser.getId());
+        params.put("projId", "" + proj.getId());
         String response = getResponse(params);
         if (response == null) {
             return null;
@@ -253,7 +332,8 @@ public class APICalls {
         } else {
             JsonArray e = getResponseAsJsonArray(response);
             if (e != null) {
-                Project[] ret = g.fromJson(e, Project[].class);
+                Gson dateGson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+                Project[] ret = dateGson.fromJson(e, Project[].class);
                 return ret;
             } else {
                 return null;
@@ -270,17 +350,13 @@ public class APICalls {
             params.put("individualId", "" + individualInCharge.getId());
         }
         params.put("userId", "" + currentUser.getId());
-        params.put("endDate", "2008-12-11");
+        params.put("endDate", endDate);
         String response = postResponse(params);
         if (response == null) {
             return false;
         } else {
             String statusCode = (getResponseAsJsonObject(response)).get("status_code").getAsString();
-            if(!statusCode.equals("200") || statusCode.equals("404")) {
-                return false;
-            } else {
-                return true;
-            }
+            return !(!statusCode.equals("200") || statusCode.equals("404"));
         }
     }
 
@@ -294,12 +370,7 @@ public class APICalls {
             return false;
         } else {
             String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
-            if(!statusCode.equals("200") || statusCode.equals("404")) {
-                return false;
-            }
-            else {
-                return true;
-            }
+            return !(!statusCode.equals("200") || statusCode.equals("404"));
         }
     }
 
@@ -313,11 +384,7 @@ public class APICalls {
             return false;
         } else {
             String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
-            if((!statusCode.equals("200")) || statusCode.equals("404")) {
-                return false;
-            } else {
-                return true;
-            }
+            return !((!statusCode.equals("200")) || statusCode.equals("404"));
         }
     }
 
@@ -341,11 +408,7 @@ public class APICalls {
             return false;
         } else {
             String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
-            if(!statusCode.equals("200") || statusCode.equals("404")) {
-                return false;
-            } else {
-                return true;
-            }
+            return !(!statusCode.equals("200") || statusCode.equals("404"));
         }
     }
 
@@ -360,11 +423,7 @@ public class APICalls {
             return false;
         } else {
             String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
-            if((!statusCode.equals("200")) || statusCode.equals("404")) {
-                return false;
-            } else {
-                return true;
-            }
+            return !((!statusCode.equals("200")) || statusCode.equals("404"));
         }
     }
 
@@ -380,10 +439,78 @@ public class APICalls {
             return false;
         } else {
             String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
-            if((!statusCode.equals("200")) || statusCode.equals("404")) {
+            return statusCode.equals("200");
+        }
+    }
+
+    public static boolean markAsDamaged(Equipment object, User currentUser) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("op", "markDamaged");
+        params.put("objId", "" + object.getId());
+        params.put("userId", "" + currentUser.getId());
+        String response = postResponse(params);
+        if(response == null) {
+            return false;
+        } else {
+            String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
+            return statusCode.equals("200");
+        }
+    }
+
+    public static boolean markAsFixed(Equipment object, User currentUser) {
+        HashMap<String, String> params = new HashMap<String, String>();
+        params.put("op", "markFixed");
+        params.put("objId", "" + object.getId());
+        params.put("userId", "" + currentUser.getId());
+        String response = postResponse(params);
+        if(response == null) {
+            return false;
+        } else {
+            String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
+            return statusCode.equals("200");
+        }
+    }
+
+    public static boolean addUser(String name, String email, String password) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("op", "addUser");
+        params.put("userName", name);
+        params.put("userEmail", email);
+        params.put("pass", password);
+        String response = postResponse(params);
+        if(response == null) {
+            return false;
+        } else {
+            if(getResponseAsJsonObject(response).get("status_message").equals("duplicate")) {
+                Log.d("API", "Duplicate exists");
                 return false;
+            }
+            String statusCode = (getResponseAsJsonObject(response).get("status_code")).getAsString();
+            return !((!statusCode.equals("200")) || statusCode.equals("404"));
+        }
+    }
+
+    public static User login(String email, String pass) {
+        HashMap<String, String> params = new HashMap<>();
+        params.put("op", "login");
+        params.put("userEmail", email);
+        params.put("pass", pass);
+        String response = postResponse(params);
+        Log.d("REsponse", response);
+        if(response == null) {
+            return null;
+        }
+        else {
+            JsonObject j = getResponseAsJsonObject(response);
+            JsonElement stat = j.get("status_message");
+            if(stat.getAsString().equals("login success")) {
+                j = j.getAsJsonObject("data");
+                User returnUser = g.fromJson(j, User.class);
+                Log.d("User", returnUser.getId() + " " + returnUser.getName() + " " + returnUser.getEmail());
+                Log.d("HALP", returnUser.getName() + " " + returnUser.getEmail() + " " + returnUser.getId());
+                return returnUser;
             } else {
-                return true;
+                return null;
             }
         }
     }

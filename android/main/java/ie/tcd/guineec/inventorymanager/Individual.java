@@ -3,12 +3,12 @@ package ie.tcd.guineec.inventorymanager;
 public class Individual {
     private int id;
     private String name;
-    private User createdBy;
+    private int created_by;
 
-    public Individual(int id, String name, User createdBy) {
+    public Individual(int id, String name, int created_by) {
         this.id = id;
         this.name = name;
-        this.createdBy = createdBy;
+        this.created_by = created_by;
     }
 
     public int getId() {
@@ -19,7 +19,7 @@ public class Individual {
         return name;
     }
 
-    public User getCreatedBy() {
-        return createdBy;
+    public int getCreatedBy() {
+        return created_by;
     }
 }

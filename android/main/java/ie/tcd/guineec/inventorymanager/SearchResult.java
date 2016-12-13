@@ -6,33 +6,34 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+
+import java.lang.reflect.Array;
 
 /**
- * Created by dywal on 20/11/2016.
+ * Created by DDunne on 12/12/2016.
  */
 
-//DISPLAYS THE BARCODE VALUE AS A RESULT OF THE BARCODE SCANNER APP
-public class useContent extends AppCompatActivity {
-    //side bar vars
+public class SearchResult extends AppCompatActivity {
+
+    private User currentUser;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mToggle;
     //variable for the sidebar to change screens
     NavigationView navigationView;
+    //button to add a project
+    private static ArrayAdapter<String> adapter;
 
-    private TextView textviewResult;
-    static String content;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_screen);
+        setContentView(R.layout.searched_objects_screen);
 
-        if(content!=null && !content.isEmpty())
-        {
-            textviewResult=(TextView)findViewById(R.id.result);
-            textviewResult.setText(content);
-        }
+
         //side bar code
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawerLayout);
         mToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.open, R.string.close);
@@ -49,18 +50,28 @@ public class useContent extends AppCompatActivity {
                 switch(item.getItemId()) {
 
                     case R.id.nav_projects:
-                        Intent intent = new Intent(useContent.this, Myprojects.class);
+                        Intent intent = new Intent(SearchResult.this, Myprojects.class);
                         startActivity(intent);
                         item.setChecked(true);
                         break;
                     case R.id.nav_indiv:
-                        Intent intent2 = new Intent(useContent.this, add_indiv.class);
+                        Intent intent2 = new Intent(SearchResult.this, add_indiv.class);
                         startActivity(intent2);
                         item.setChecked(true);
                         break;
                     case R.id.nav_scan:
-                        Intent intent3 = new Intent(useContent.this, scanner.class);
+                        Intent intent3 = new Intent(SearchResult.this, scanner.class);
                         startActivity(intent3);
+                        item.setChecked(true);
+                        break;
+                    case R.id.nav_search:
+                        Intent intent4 = new Intent(SearchResult.this, Search.class);
+                        startActivity(intent4);
+                        item.setChecked(true);
+                        break;
+                    case R.id.nav_logout:
+                        Intent intent5 = new Intent(SearchResult.this, MainActivity.class);
+                        startActivity(intent5);
                         item.setChecked(true);
                         break;
                 }
@@ -68,8 +79,12 @@ public class useContent extends AppCompatActivity {
             }
         });
         //end of sider bar code except onOpitionsItemSelected function
+
+        ListView list = (ListView) findViewById(R.id.list_view_search);
+        list.setAdapter(adapter);
+
     }
-    //side bar function
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -79,10 +94,7 @@ public class useContent extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-
-    public static void getContent(String contents){
-        content=contents;
+    public static void getAdapter(ArrayAdapter<String> a){
+        adapter = a;
     }
 }
-
